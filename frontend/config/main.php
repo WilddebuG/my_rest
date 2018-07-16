@@ -34,6 +34,20 @@ return [
                 ],
             ],
         ],
+        'response' => [
+            'format' =>  \yii\web\Response::FORMAT_JSON,
+            'class' => 'yii\web\Response',
+            'on beforeSend' => function ($event) {
+                $response = $event->sender;
+                if ($response->data !== null) {
+                    $response->data = [
+                        'success' => $response->isSuccessful,
+                        'data' => $response->data,
+                    ];
+                    $response->statusCode = 200;
+                }
+            },
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
