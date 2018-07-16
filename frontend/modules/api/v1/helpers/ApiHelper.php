@@ -10,7 +10,7 @@ namespace frontend\modules\api\v1\helpers;
 
 use yii;
 use common\models\User;
-use common\models\UserProfile;
+//use common\models\UserProfile;
 
 class ApiHelper
 {
@@ -46,12 +46,12 @@ class ApiHelper
 
         $_status = self::getIsUserActive(Yii::$app->user->id);
 
-        if ((is_array($_status) && $_status['status'] == User::STATUS_ACTIVE && \Yii::$app->user->can('api_user')) or Yii::$app->user->id == null) {
+        if ((is_array($_status) && $_status['status'] == User::STATUS_ACTIVE) or Yii::$app->user->id == null) {
             self::setHeader($code);
             echo json_encode($data, JSON_PRETTY_PRINT);
         } else {
             self::setHeader(401);
-            echo json_encode(['status' => 0, 'error_code' => 401, 'errors' => \Yii::t('frontend_api', 'Unauthorized')], JSON_PRETTY_PRINT);
+            echo json_encode(['status' => 0, 'error_code' => 401, 'errors' => 'Unauthorized'], JSON_PRETTY_PRINT);
         }
         Yii::$app->end();
     }
@@ -62,24 +62,21 @@ class ApiHelper
     public static function getUserData($userId){
         if($userId){
             $tblUser = User::tableName();
-            $tblProfil = UserProfile::tableName();
+//            $tblProfil = UserProfile::tableName();
             $model = User::find()
                 ->select([
                     $tblUser.'.id',
                     $tblUser.'.email',
-//                    $tblUser.'.username',
                     $tblUser.'.access_token',
-//                    'password' => $tblUser.'.password_hash',
                     $tblUser.'.created_at',
                     $tblUser.'.updated_at',
-                    $tblUser.'.logged_at',
                     $tblUser.'.status'
                 ])
-                ->joinWith('userProfile')
-                ->andWhere([
-                    'status' => User::STATUS_ACTIVE,
-                    'id' => $userId
-                ])
+//                ->joinWith('userProfile')
+//                ->andWhere([
+//                    'status' => User::STATUS_ACTIVE,
+//                    'id' => $userId
+//                ])
                 ->one();
 
             if($model){
@@ -87,17 +84,17 @@ class ApiHelper
 
 //                $uArr['password'] = $model->password_hash;
                 unset($uArr['password_hash']);
-                $uArr['firstname'] = $model->userProfile->firstname;
-                $uArr['lastname'] = $model->userProfile->lastname;
-                $uArr['cardnumber'] = $model->userProfile->cardnumber;
-                $uArr['phone'] = $model->userProfile->phone;
-                $uArr['companyId'] = $model->userProfile->companyId;
-                $uArr['city_id'] = $model->userProfile->city_id;
-                $uArr['image'] = $model->userProfile->getAvatar() ? \Yii::$app->getRequest()->getHostInfo() . $model->userProfile->getAvatar() : '';
+//                $uArr['firstname'] = $model->userProfile->firstname;
+//                $uArr['lastname'] = $model->userProfile->lastname;
+//                $uArr['cardnumber'] = $model->userProfile->cardnumber;
+//                $uArr['phone'] = $model->userProfile->phone;
+//                $uArr['companyId'] = $model->userProfile->companyId;
+//                $uArr['city_id'] = $model->userProfile->city_id;
+//                $uArr['image'] = $model->userProfile->getAvatar() ? \Yii::$app->getRequest()->getHostInfo() . $model->userProfile->getAvatar() : '';
 
 
-                $cImg = \common\models\CardDesign::getCardData(['cardnumber' => $model->userProfile->cardnumber]);
-                $uArr['cardImage'] = !empty($cImg) ? \Yii::$app->getRequest()->getHostInfo() . $cImg : '';
+//                $cImg = \common\models\CardDesign::getCardData(['cardnumber' => $model->userProfile->cardnumber]);
+//                $uArr['cardImage'] = !empty($cImg) ? \Yii::$app->getRequest()->getHostInfo() . $cImg : '';
 
 
                 return $uArr;
