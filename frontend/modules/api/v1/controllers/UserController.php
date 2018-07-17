@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: wilddebug
+ * User: wildDebug
  * Date: 16.07.18
  * Time: 14:45
  */
@@ -9,15 +9,12 @@
 namespace frontend\modules\api\v1\controllers;
 
 
-use frontend\modules\api\v1\resources\User;
-use yii\web\Response;
+use frontend\modules\api\v1\resources\User as UserResource;
 use frontend\modules\api\v1\helpers\ApiHelper;
+use frontend\modules\api\v1\resources\User;
 use yii\helpers\ArrayHelper;
 use yii\data\ActiveDataProvider;
-use yii\filters\auth\CompositeAuth;
-use yii\filters\auth\HttpBasicAuth;
-use yii\filters\auth\HttpBearerAuth;
-use yii\filters\auth\QueryParamAuth;
+use yii\web\NotFoundHttpException;
 
 
 class UserController extends ApiActiveController
@@ -28,30 +25,6 @@ class UserController extends ApiActiveController
      */
     public $modelClass = 'frontend\modules\api\v1\resources\User';
 
-    public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-        $behaviors['contentNegotiator']['formats']['application/json'] = Response::FORMAT_JSON;
-        $behaviors['authenticator'] = [
-            'except' => ['index','view'],
-            'class' => CompositeAuth::className(),
-            'authMethods' => [
-                [
-                    'class' => HttpBasicAuth::className(),
-                    'auth' => function ($username, $password) {
-                        $user = User::findByLogin($username);
-                        return $user->validatePassword($password)
-                            ? $user
-                            : null;
-                    }
-                ],
-                HttpBearerAuth::className(),
-                QueryParamAuth::className()
-            ]
-        ];
-        return $behaviors;
-    }
-
     public function actions()
     {
         $actions = parent::actions();
@@ -61,31 +34,40 @@ class UserController extends ApiActiveController
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'actionIndex']
             ],
+            'update' => [
+                'class' => 'yii\rest\UpdateAction',
+                'modelClass' => $this->modelClass,
+//                'prepareDataProvider' => [$this, 'actionUpdate']
+            ],
         ]);
 
-        unset($actions['create'],$actions['options']);
+        unset($actions['create'], $actions['update'], $actions['options']);
         return $actions;
-    }
-
-    public function afterAction($action, $result)
-    {
-        $result = parent::afterAction($action, $result);
-        if(isset($result['data']) && !empty($result['data'])) {
-            $result['status'] = 1;
-            ApiHelper::sendRequest(200, $result);
-        } else {
-            ApiHelper::sendRequest(200, ['status' => 1, 'data' => $result]);
-        }
     }
 
     public function actionIndex()
     {
-        $query = User::find()->with('userProfile');
+        $query = UserResource::find()->with('userProfile');
         return new ActiveDataProvider(array(
             'query' => $query
         ));
     }
 
+    public function actionUpdate($id)
+    {
+        /* @var $model UserResource */
+        $data = \Yii::$app->getRequest()->getBodyParams();
 
+        if (empty($data['email']) || empty($data['id'])) {
+            ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "bad param request"]);
+        }
+        $userExist = User::find()->andWhere(['id' => $data['id'], 'email' => $data['email']])->one();
+        if (!$userExist){
+            ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "User not exist"]);
+        }
+        $model = new UserForm();
+
+        return $userExist;
+    }
 
 }

@@ -36,7 +36,7 @@ class UserProfile extends \yii\db\ActiveRecord
         return [
             [['locale'], 'required'],
             [['gender'], 'integer'],
-            [['firstname', 'middlename', 'lastname', 'avatar_path', 'avatar_base_url'], 'string', 'max' => 255],
+            [['firstname', 'middlename', 'lastname', 'avatar_path', 'avatar_base_url'], 'safe', 'string', 'max' => 255],
             [['locale'], 'string', 'max' => 32],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];

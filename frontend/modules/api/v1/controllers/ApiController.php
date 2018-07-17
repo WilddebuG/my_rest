@@ -11,7 +11,6 @@ namespace frontend\modules\api\v1\controllers;
 
 use yii\rest\ActiveController;
 use frontend\modules\api\v1\helpers\ApiHelper;
-use yii\console\ErrorHandler;
 use Yii;
 
 class ApiController extends ActiveController

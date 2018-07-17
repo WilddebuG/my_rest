@@ -42,7 +42,7 @@ class ApiHelper
     }
 
     public static function sendRequest($code, $data = array()){
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        Yii::$app->response->format = Yii\web\Response::FORMAT_JSON;
 
         $_status = self::getIsUserActive(Yii::$app->user->id);
 
