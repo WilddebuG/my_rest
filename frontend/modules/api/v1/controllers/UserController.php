@@ -9,9 +9,10 @@
 namespace frontend\modules\api\v1\controllers;
 
 
+use common\models\UserProfile;
 use frontend\modules\api\v1\resources\User as UserResource;
 use frontend\modules\api\v1\helpers\ApiHelper;
-use frontend\modules\api\v1\resources\User;
+use common\models\User;
 use yii\helpers\ArrayHelper;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
@@ -47,13 +48,13 @@ class UserController extends ApiActiveController
 
     public function actionIndex()
     {
-        $query = UserResource::find()->with('userProfile');
+        $query = UserResource::find();
         return new ActiveDataProvider(array(
             'query' => $query
         ));
     }
 
-    public function actionUpdate($id)
+    public function actionUpdate()
     {
         /* @var $model UserResource */
         $data = \Yii::$app->getRequest()->getBodyParams();
@@ -61,13 +62,24 @@ class UserController extends ApiActiveController
         if (empty($data['email']) || empty($data['id'])) {
             ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "bad param request"]);
         }
-        $userExist = User::find()->andWhere(['id' => $data['id'], 'email' => $data['email']])->one();
-        if (!$userExist){
+        $user = UserResource::find()->andWhere(['id' => $data['id'], 'email' => $data['email']])->one();
+        $userProfile = UserProfile::find()->andWhere(['user_id' => $data['id']])->one();
+
+        if (!$user) {
             ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "User not exist"]);
         }
-        $model = new UserForm();
 
-        return $userExist;
+        if ($user->load($data, '') && $userProfile->load($data,'')) {
+            var_dump($user);exit;
+            $isValid = $user->validate();
+            $isValid = $userProfile->validate() && $isValid;
+            if ($isValid) {
+                $user->save(false);
+                $userProfile->save(false);
+                ApiHelper::sendRequest(200, ['status' => 1, 'data' => $userProfile]);
+            }
+        }
+        return $user;
     }
 
 }
