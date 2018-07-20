@@ -35,11 +35,6 @@ class UserController extends ApiActiveController
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'actionIndex']
             ],
-            'update' => [
-                'class' => 'yii\rest\UpdateAction',
-                'modelClass' => $this->modelClass,
-//                'prepareDataProvider' => [$this, 'actionUpdate']
-            ],
         ]);
 
         unset($actions['create'], $actions['update'], $actions['options']);
@@ -56,27 +51,29 @@ class UserController extends ApiActiveController
 
     public function actionUpdate()
     {
-        /* @var $model UserResource */
         $data = \Yii::$app->getRequest()->getBodyParams();
+        $datetime = new \DateTime("now");
 
-        if (empty($data['email']) || empty($data['id'])) {
+        if (empty($data)) {
             ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "bad param request"]);
         }
-        $user = UserResource::find()->andWhere(['id' => $data['id'], 'email' => $data['email']])->one();
-        $userProfile = UserProfile::find()->andWhere(['user_id' => $data['id']])->one();
+
+        $user = User::find()->thisUser()->isActive()->one();
+        $userProfile = UserProfile::find()->thisUser()->one();
 
         if (!$user) {
             ApiHelper::sendRequest(400, ['status' => 0, 'error_code' => 400, 'errors' => "User not exist"]);
         }
 
-        if ($user->load($data, '') && $userProfile->load($data,'')) {
-            var_dump($user);exit;
+        if ($user->load($data, '') && $userProfile->load($data, '')) {
+            $user->updated_at = $datetime->getTimestamp();
+            $user->created_at = $user->getOldAttribute('created_at');
             $isValid = $user->validate();
             $isValid = $userProfile->validate() && $isValid;
             if ($isValid) {
                 $user->save(false);
                 $userProfile->save(false);
-                ApiHelper::sendRequest(200, ['status' => 1, 'data' => $userProfile]);
+                ApiHelper::sendRequest(200, ['status' => 1, 'data' => [$user->toArray(), $userProfile->toArray()]]);
             }
         }
         return $user;

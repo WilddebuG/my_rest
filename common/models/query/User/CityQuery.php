@@ -3,11 +3,11 @@
 namespace common\models\query\User;
 
 /**
- * This is the ActiveQuery class for [[\common\models\UserProfile]].
+ * This is the ActiveQuery class for [[\common\models\City]].
  *
- * @see \common\models\UserProfile
+ * @see \common\models\City
  */
-class UserProfileQuery extends \yii\db\ActiveQuery
+class CityQuery extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
@@ -16,7 +16,7 @@ class UserProfileQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return \common\models\UserProfile[]|array
+     * @return \common\models\City[]|array
      */
     public function all($db = null)
     {
@@ -25,14 +25,10 @@ class UserProfileQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return \common\models\UserProfile|array|null
+     * @return \common\models\City|array|null
      */
     public function one($db = null)
     {
         return parent::one($db);
-    }
-
-    public function thisUser(){
-        return $this->andWhere(['user_id' => \Yii::$app->user->id]);
     }
 }

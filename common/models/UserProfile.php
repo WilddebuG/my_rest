@@ -33,14 +33,13 @@ class UserProfile extends \yii\db\ActiveRecord
      */
     public function rules()
     {
-//        return [
-//            [['locale'], 'required'],
-//            [['gender'], 'integer'],
-//            [['firstname', 'middlename', 'lastname'], 'safe', 'string', 'max' => 255],
-//            [['locale'], 'string', 'max' => 32],
-//            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-//        ];
-        return [];
+        return [
+            [['locale'], 'required'],
+            [['gender'], 'integer'],
+            [['firstname', 'middlename', 'lastname', 'locale'], 'string', 'max' => 255],
+            [['locale'], 'string', 'max' => 32],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+        ];
     }
 
     /**

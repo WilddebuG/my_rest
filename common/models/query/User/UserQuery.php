@@ -1,6 +1,7 @@
 <?php
 
 namespace common\models\query\User;
+use common\models\User;
 
 /**
  * This is the ActiveQuery class for [[\common\models\User]].
@@ -30,5 +31,13 @@ class UserQuery extends \yii\db\ActiveQuery
     public function one($db = null)
     {
         return parent::one($db);
+    }
+
+    public function isActive(){
+        return $this->andWhere(['status' => User::STATUS_ACTIVE]);
+    }
+
+    public function thisUser(){
+        return $this->andWhere(['id' => \Yii::$app->user->id]);
     }
 }
